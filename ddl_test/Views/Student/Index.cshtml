@@ -1,0 +1,141 @@
+﻿@model ddl_test.Models.StudentDto
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+@{
+    <form asp-action="Index" method="post" role="form">
+        <div class="alert-danger" asp-validation-summary="ModelOnly"></div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input type="hidden" asp-for="StudentId" />
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label asp-for="Mobile" class="control-label"></label>
+                    <input asp-for="Mobile" class="form-control" />
+                    <span asp-validation-for="Mobile" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label asp-for="CountryId" class="control-label"></label>
+                    <select asp-for="CountryId" class="form-control"
+                            asp-items="@(new SelectList(ViewBag.countries, "CountryId","CountryName"))">
+                    </select>
+                    <span asp-validation-for="CountryId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label asp-for="StateId" class="control-label"></label>
+                    <select asp-for="StateId" class="form-control"
+                            asp-items="@(new SelectList(ViewBag.State, "StateId","StateName"))">
+                    </select>
+                    <span asp-validation-for="StateId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label asp-for="CityId" class="control-label"></label>
+                    <select asp-for="CityId" class="form-control"
+                            asp-items="@(new SelectList(ViewBag.City, "CityId","CityName"))">
+                    </select>
+                    <span asp-validation-for="CityId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input type="submit" class="btn btn-outline-warning" value="@ViewBag.BT" id="submit" />
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-responsive table-striped">
+                <tr>
+                    <th>SRN</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Country</th>
+                    <th>State</th>
+                    <th>City</th>
+                    <th>Action</th>
+                </tr>
+
+                @foreach (var data in Model.sutdents.Select((value, i) => (value, i)))
+                {
+                    var count = data.i + 1;
+                    <tr>
+                        <td>@count</td>
+                        <td>@data.value.Name</td>
+                        <td>@data.value.Mobile</td>
+                        <td>@data.value.CountryName</td>
+                        <td>@data.value.StateName</td>
+                        <td>@data.value.CityName</td>
+                        <td>
+                            <a asp-action="Index" asp-route-id="@data.value.StudentId" class="btn btn-outline-dark">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@data.value.StudentId"
+                               onclick="return confirm('Are sure to delete?')"
+                               class="btn btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js" type="text/javascript"></script>
+    <script>
+       $(document).ready(function () {
+           var item = '<option value ="0">--Select--</option>';
+           $("#CountryId").change(function () {
+               var url = '@Url.Content("~/")' + "Student/GetState";
+               $.getJSON(url, { countryId: $("#CountryId").val() }, function (data) {
+                   var items = '';
+                   $("#StateId").empty();
+                   $("#CityId").empty();
+                   $.each(data, function (i, state) {
+                       console.log(state);
+                       items += '<option value =' + state.value + '>' + state.text + '</option>'
+                   });
+                   $("#StateId").html(items);
+                   $("#CityId").html(item);
+               });
+           });
+
+           $("#StateId").change(function () {
+               var url = '@Url.Content("~/")' + "Student/GetCity";
+               $.getJSON(url, { stateId: $("#StateId").val() }, function (data) {
+                   var items = '';
+                   $("#CityId").empty();
+                   console.log(data);
+                   $.each(data, function (i, city) {
+                       console.log(city);
+                       items += '<option value =' + city.value + '>' + city.text + '</option>'
+                   });
+                   $("#CityId").html(items);
+               });
+           });
+       });
+    </script>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
